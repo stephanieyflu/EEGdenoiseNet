@@ -13,7 +13,7 @@ from train_method import *
 from save_method import *
 import sys
 import os
-#sys.path.append('../')
+sys.path.append('../')
 from Novel_CNN import *
 
 # EEGdenoiseNet V2
@@ -21,15 +21,15 @@ from Novel_CNN import *
 # Here is the main part of the denoising neurl network, We can adjust all the parameter in the user-defined area.
 #####################################################自定义 user-defined ########################################################
 
-epochs = 50    # training epoch
+epochs = 20    # training epoch
 batch_size  = 40    # training batch size
 combin_num = 10    # combin EEG and noise ? times
 denoise_network = 'Simple_CNN'    # fcNN & Simple_CNN & Complex_CNN & RNN_lstm  & Novel_CNN 
 noise_type = 'EOG'
 
 
-result_location = r'E:/experiment_data/EEG_EEGN/'     #  Where to export network results   ############ change it to your own location #########
-foldername = 'EMG_unet112dense_10_rmsp_test'            # the name of the target folder (should be change when we want to train a new network)
+result_location = r'/workspaces/EEGdenoiseNet/results'     #  Where to export network results   ############ change it to your own location #########
+foldername = 'SimpleCNN_EOG_Trial1'            # the name of the target folder (should be change when we want to train a new network)
 os.environ['CUDA_VISIBLE_DEVICES']='0'
 save_train = False
 save_vali = False
@@ -37,9 +37,9 @@ save_test = True
 
 
 ################################################## optimizer adjust parameter  ####################################################
-rmsp=tf.optimizers.RMSprop(lr=0.00005, rho=0.9)
-adam=tf.optimizers.Adam(lr=0.00005, beta_1=0.5, beta_2=0.9, epsilon=1e-08)
-sgd=tf.optimizers.SGD(lr=0.0002, momentum=0.9, decay=0.0, nesterov=False)
+rmsp=tf.optimizers.legacy.RMSprop(lr=0.00005, rho=0.9)
+adam=tf.optimizers.legacy.Adam(lr=0.00005, beta_1=0.5, beta_2=0.9, epsilon=1e-08)
+sgd=tf.optimizers.legacy.SGD(lr=0.0002, momentum=0.9, decay=0.0, nesterov=False)
 
 optimizer = rmsp
 
@@ -56,7 +56,7 @@ denoiseNN = tf.keras.models.load_model(path)
 '''
 #################################################### 数据输入 Import data #####################################################
 
-file_location = 'E:/experiment_data/EEGdenoiseNet/data/'                    ############ change it to your own location #########
+file_location = '/workspaces/EEGdenoiseNet/data/'                    ############ change it to your own location #########
 if noise_type == 'EOG':
   EEG_all = np.load( file_location + 'EEG_all_epochs.npy')                              
   noise_all = np.load( file_location + 'EOG_all_epochs.npy') 
@@ -103,5 +103,5 @@ save_eeg(saved_model, result_location, foldername, save_train, save_vali, save_t
 np.save(result_location +'/'+ foldername + '/'+ str(i)  +'/'+ "nn_output" + '/'+ 'loss_history.npy', history)
 
 #save model
-# path = os.path.join(result_location, foldername, str(i+1), "denoise_model")
-# tf.keras.models.save_model(saved_model, path)
+path = os.path.join(result_location, foldername, str(i+1), "denoise_model")
+tf.keras.models.save_model(saved_model, path)
